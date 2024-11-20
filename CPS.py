@@ -145,7 +145,7 @@ class RbtClient(object):
         # return retData
 
     def sendAndRecv(self, cmd, result):
-        print(cmd)
+        # print(cmd)
         try:
             self.tcp.send(cmd.encode())
             ret = self.tcp.recv(self.clientPort).decode("utf-8", "ignore")
