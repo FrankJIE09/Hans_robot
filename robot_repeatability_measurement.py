@@ -7,6 +7,7 @@ from hub_data_reader import read_average_data, parse_data  # 假设可以导入�
 import os
 import datetime
 
+
 # 读取配置文件
 def load_config(config_file='config.yaml'):
     try:
@@ -17,8 +18,11 @@ def load_config(config_file='config.yaml'):
         print(f"加载配置文件失败: {e}")
         return []
 
+
 # 机器人连接参数
-IP = '192.168.0.10'  # 替换为实际的机器人IP地址
+# IP = '192.168.0.10'  # 替换为实际的机器人IP地址
+IP = '192.168.8.23 '  # 替换为实际的机器人IP地址
+
 PORT = 10003  # 机器人默认端口
 
 # 初始化CPS客户端以控制机器人
@@ -27,6 +31,7 @@ ret = cps.HRIF_Connect(0, IP, PORT)  # 连接到机器人控制器
 if ret != 0:
     print(f"连接机器人失败，错误码: {ret}")
     exit()
+
 
 # 函数：获取机械臂末端位置和姿态
 def get_end_effector_data(cps_client):
@@ -40,6 +45,7 @@ def get_end_effector_data(cps_client):
     else:
         print("读取关节和姿态信息失败")
         return [None] * 6, [None] * 6  # 返回默认值避免数据缺失
+
 
 # 函数：测量重复精度
 def measure_repeatability(port='COM3', iterations=10, target_pose=None):
@@ -112,13 +118,24 @@ def measure_repeatability(port='COM3', iterations=10, target_pose=None):
     # 将数据保存到DataFrame中
     return pd.DataFrame(data_records)
 
+
 # 函数：控制机械臂移动
 def move_robot(cps_client, target_pose):
     speed = 50  # 运动速度
     acceleration = 500  # 加速度
     ucs = "Base"  # 坐标系
     radius = 0  # 直线运动半径
-    ret = cps_client.HRIF_MoveL(0, 0, points=target_pose, RawACSpoints=target_pose, tcp="TCP", ucs=ucs,
+    # 读取当前关节位置
+    RawACSpoints = []  # 存储关节位置的列表
+    status = cps.HRIF_ReadCmdJointPos(0, 0, RawACSpoints)  # 读取关节位置
+    if status == 0:  # 假设0表示读取成功
+        RawACSpoints = [float(point) for point in RawACSpoints]  # 将读取的字符串转换为浮点数
+        # print("当前关节位置:", RawACSpoints)
+    else:
+        print(f"读取关节位置失败，错误码: {status}")
+        cps.HRIF_DisConnect(0)  # 读取失败时断开连接并退出
+        exit()
+    ret = cps_client.HRIF_MoveL(0, 0, points=target_pose, RawACSpoints=RawACSpoints[0:6], tcp="TCP", ucs=ucs,
                                 speed=speed, Acc=acceleration, radius=radius, isSeek=0, bit=0, state=1, cmdID=1)
     if ret == 0:
         # 等待运动完成
@@ -134,6 +151,7 @@ def move_robot(cps_client, target_pose):
     else:
         print(f"机器人运动失败，错误码: {ret}")
 
+
 # 函数：随机方向上的移动
 def random_movement(cps_client, current_pose):
     random_offsets = [random.uniform(-5, 5) for _ in range(len(current_pose))]  # 生成随机偏移值
@@ -141,10 +159,12 @@ def random_movement(cps_client, current_pose):
     move_robot(cps_client, random_pose)
     return random_pose  # 返回随机偏移后的姿态
 
+
 # 函数：获取千分表读数
 def get_gauge_reading(port):
     response = read_average_data(port)  # 读取数据
     return response  # 解析数据
+
 
 # 加载目标位置配置
 target_pose = load_config()

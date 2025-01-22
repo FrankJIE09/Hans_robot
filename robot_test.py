@@ -3,7 +3,7 @@ import random
 import pandas as pd
 import yaml  # 用于读取 YAML 配置
 from CPS import CPSClient
-from hub_data_reader import read_average_data, parse_data  # 假设可以导入相关数据读取函数
+# from hub_data_reader import read_average_data, parse_data  # 假设可以导入相关数据读取函数
 
 # 读取配置文件
 def load_config(config_file='config.yaml'):
@@ -16,7 +16,7 @@ def load_config(config_file='config.yaml'):
         return []
 
 # 机器人连接参数
-IP = '192.168.0.10'  # 替换为实际的机器人IP地址
+IP = '192.168.8.23'  # 替换为实际的机器人IP地址
 PORT = 10003  # 机器人默认端口
 
 # 初始化CPS客户端以控制机器人
@@ -94,8 +94,8 @@ def random_movement(cps_client, current_pose):
 # 函数：获取千分表读数
 def get_gauge_reading(port):
 
-    response = read_average_data(port)  # 读取数据
-    return response  # 解析数据
+    # response = read_average_data(port)  # 读取数据
+    return 0  # 解析数据
 
 # 加载目标位置配置
 target_pose = load_config()

@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="contact-graspnet205" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="robotics_transformer" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Hans_robot" project-jdk-type="Python SDK" />
 </project>
